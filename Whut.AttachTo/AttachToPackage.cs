@@ -9,6 +9,7 @@ using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.Web.Application;
 using Microsoft.Web.Administration;
 using Application = Microsoft.Web.Administration.Application;
+using Binding = Microsoft.Web.Administration.Binding;
 
 namespace Whut.AttachTo
 {
@@ -81,9 +82,8 @@ namespace Whut.AttachTo
                     {
                         var uri = new Uri(extend.IISUrl);
                         var site = serverManager.Sites.FirstOrDefault(x => x.Bindings.Any(y =>
-                                                                                          y.Host == uri.Host &&
-                                                                                          y.EndPoint.Port ==
-                                                                                          uri.Port &&
+                                                                                          EqualHosts(y, uri) &&
+                                                                                          y.EndPoint.Port == uri.Port &&
                                                                                           y.Protocol == uri.Scheme));
 
                         if (site == null)
@@ -121,6 +121,11 @@ namespace Whut.AttachTo
                     }
                 }
             }
+        }
+
+        private static bool EqualHosts(Binding binding, Uri uri)
+        {
+            return binding.Host == uri.Host || (binding.Host == "" && uri.Host.Equals("localhost", StringComparison.OrdinalIgnoreCase));
         }
     }
 }
